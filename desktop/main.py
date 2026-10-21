@@ -31,17 +31,17 @@ options = HandLandmarkerOptions(
 camera = cv2.VideoCapture(0)
 
 if not camera.isOpened():
-    print("Impossible d'ouvrir la webcam.")
+    print("Impossible to open the webcam.")
     raise SystemExit
 
-print("EyesOnMe est lancé ! Appuie sur Q pour quitter.")
+print("EyesOnMe is running! Press Q to quit.")
 
 with HandLandmarker.create_from_options(options) as detector:
     while True:
         success, image = camera.read()
 
         if not success:
-            print("Impossible de lire l'image de la webcam.")
+            print("Impossible to read your webcam image.")
             break
 
         image = cv2.flip(image, 1)
@@ -71,7 +71,7 @@ with HandLandmarker.create_from_options(options) as detector:
                 for x, y in points:
                     cv2.circle(image, (x, y), 5, (0, 200, 255), -1)
 
-        cv2.imshow("EyesOnMe - Detection des mains", image)
+        cv2.imshow("EyesOnMe - Hands detection", image)
 
         if cv2.waitKey(1) & 0xFF == ord("q"):
             break
