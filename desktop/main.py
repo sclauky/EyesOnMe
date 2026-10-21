@@ -61,6 +61,7 @@ with HandLandmarker.create_from_options(options) as detector:
         results = detector.detect_for_video(mp_image, timestamp_ms)
 
         current_hands = {}
+        hand_gestures = {}
 
         if results.hand_landmarks:
             for hand_index, hand_landmarks in enumerate(results.hand_landmarks):
@@ -100,6 +101,17 @@ with HandLandmarker.create_from_options(options) as detector:
 
                 current_hands[label] = points
 
+                finger_tips = [8, 12, 16, 20]
+                extended_fingers = sum(
+                    points[tip][1] < points[tip - 2][1]
+                    for tip in finger_tips
+                )
+
+                if extended_fingers >= 3:
+                    hand_gestures[label] = "Open Hand"
+                else:
+                    hand_gestures[label] = "Closed Hand"
+
         previous_hands = current_hands
 
         for label, points in current_hands.items():
@@ -125,6 +137,17 @@ with HandLandmarker.create_from_options(options) as detector:
                 cv2.FONT_HERSHEY_SIMPLEX,
                 0.7,
                 (255, 255, 255),
+                2
+            )
+
+        for label, gesture in hand_gestures.items():
+            cv2.putText(
+                image,
+                f"{label}: {gesture}",
+                (20, 40 if label == "Left" else 70),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.8,
+                (0, 255, 255),
                 2
             )
 
