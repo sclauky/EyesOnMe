@@ -4,6 +4,8 @@ from pathlib import Path
 from math import hypot
 import pyautogui
 
+pyautogui.PAUSE = 0
+
 model_path = Path(__file__).parent / "models" / "hand_landmarker.task"
 
 BaseOptions = mp.tasks.BaseOptions
@@ -39,6 +41,8 @@ options = HandLandmarkerOptions(
 )
 
 camera = cv2.VideoCapture(0)
+camera.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+camera.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
 
 if not camera.isOpened():
     print("Unable to open the webcam.")
