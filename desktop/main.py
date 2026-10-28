@@ -2,6 +2,7 @@ import cv2
 import mediapipe as mp
 from pathlib import Path
 from math import hypot
+import pyautogui
 
 model_path = Path(__file__).parent / "models" / "hand_landmarker.task"
 
@@ -20,6 +21,13 @@ connections = [
 ]
 
 previous_hands = {}
+previous_gestures = {}
+gesture_candidates = {}
+gesture_counts = {}
+
+screen_width, screen_height = pyautogui.size()
+mouse_control_enabled = False
+previous_peace_sign = False
 
 options = HandLandmarkerOptions(
     base_options=BaseOptions(model_asset_path=str(model_path)),
@@ -102,17 +110,49 @@ with HandLandmarker.create_from_options(options) as detector:
                 current_hands[label] = points
 
                 finger_tips = [8, 12, 16, 20]
-                extended_fingers = sum(
+                extended_fingers = [
                     points[tip][1] < points[tip - 2][1]
                     for tip in finger_tips
-                )
+                ]
 
-                if extended_fingers >= 3:
-                    hand_gestures[label] = "Open Hand"
-                else:
-                    hand_gestures[label] = "Closed Hand"
+                
+            if extended_fingers[0] and extended_fingers[1] and not extended_fingers[2] and not extended_fingers[3]:
+                detected_gesture = "Peace Sign"
+            elif sum(extended_fingers) >= 3:
+                detected_gesture = "Open Hand"
+            else:
+                detected_gesture = "Closed Hand"
+
+            if gesture_candidates.get(label) == detected_gesture:
+                gesture_counts[label] = gesture_counts.get(label, 0) + 1
+            else:
+                gesture_candidates[label] = detected_gesture
+                gesture_counts[label] = 1
+
+            if gesture_counts[label] >= 5:
+                previous_gestures[label] = detected_gesture
+
+            hand_gestures[label] = previous_gestures.get(label, detected_gesture)
+
 
         previous_hands = current_hands
+        
+        
+        peace_sign_detected = any(
+            gesture == "Peace Sign"
+            for gesture in hand_gestures.values()
+        )
+
+        if peace_sign_detected and not previous_peace_sign:
+            mouse_control_enabled = not mouse_control_enabled
+            print(
+                "Mouse control enabled."
+                if mouse_control_enabled
+                else "Mouse control disabled."
+            )
+
+        previous_peace_sign = peace_sign_detected
+
 
         for label, points in current_hands.items():
             pixel_points = [(int(x), int(y)) for x, y in points]
@@ -152,6 +192,20 @@ with HandLandmarker.create_from_options(options) as detector:
             )
 
         cv2.imshow("EyesOnMe - Hand Tracking", image)
+        
+        
+        if mouse_control_enabled and current_hands:
+            active_hand = next(iter(current_hands.values()))
+            index_x, index_y = active_hand[8]
+
+            mouse_x = int(index_x / width * screen_width)
+            mouse_y = int(index_y / height * screen_height)
+
+            mouse_x = max(0, min(mouse_x, screen_width - 1))
+            mouse_y = max(0, min(mouse_y, screen_height - 1))
+
+            pyautogui.moveTo(mouse_x, mouse_y, duration=0)
+
 
         if cv2.waitKey(1) & 0xFF == ord("q"):
             break
