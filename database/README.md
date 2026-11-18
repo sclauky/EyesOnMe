@@ -42,7 +42,7 @@ Lecture seule, rôle `eyesonme_app`, requêtes paramétrées. Conteneur `eyesonm
 | `GET /health` | `{"status":"ok"}` |
 
 Variable `CORS_ORIGINS` (dans `.env`) : origines autorisées, séparées par des virgules ; `*` est refusé au démarrage. Lancer / mettre à jour : `docker compose up -d --build api`. Tests : `cd api && pip install -r requirements-dev.txt && pytest`.
-Exemple de bloc Nginx (à poser dans un **nouveau** fichier de site, sans toucher aux existants) : `location / { proxy_pass http://127.0.0.1:8200; }` sous le sous-domaine choisi pour l'API, avec Certbot.
+En ligne : `https://api-eyesonme.mael-llado.com` (DNS Cloudflare, Nginx de l'hôte, fichier `/etc/nginx/sites-available/api-eyesonme.mael-llado.com` : `proxy_pass http://127.0.0.1:8200;`, certificat Certbot, redirection HTTP→HTTPS).
 
 ## Ajouter une action (sans migration)
 1. Déclarer l'action : `INSERT INTO action_type (code, label, description, params_schema) VALUES ('keyboard.press', 'Appuyer sur une touche', '...', '{"key": "string"}');`
