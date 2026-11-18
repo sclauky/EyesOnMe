@@ -37,6 +37,39 @@ services:
         limits:
           memory: 256M
 
+  # API en lecture seule. Publiée sur 127.0.0.1 uniquement : le Nginx de l'hôte la joint, pas Internet.
+  api:
+    build: ./api
+    image: eyesonme_api:0.1.0
+    container_name: eyesonme_api
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://eyesonme_app:${EYESONME_APP_PASSWORD:?défini dans .env}@db:5432/${EYESONME_DB:-eyesonme}
+      CORS_ORIGINS: ${CORS_ORIGINS:?défini dans .env}
+    ports:
+      - "127.0.0.1:8200:8000"
+    networks:
+      - eyesonme_net
+    deploy:
+      resources:
+        limits:
+          memory: 96M
+
+  # Migrations : docker compose run --rm tools up   (rôle propriétaire, jamais le rôle applicatif)
+  tools:
+    image: amacneil/dbmate:2
+    profiles: [tools]
+    environment:
+      DATABASE_URL: postgres://eyesonme_owner:${EYESONME_OWNER_PASSWORD:?défini dans .env}@db:5432/${EYESONME_DB:-eyesonme}?sslmode=disable
+      DBMATE_NO_DUMP_SCHEMA: "true"
+    volumes:
+      - ./migrations:/db/migrations:ro
+    networks:
+      - eyesonme_net
+
 volumes:
   eyesonme_pgdata:
     name: eyesonme_pgdata

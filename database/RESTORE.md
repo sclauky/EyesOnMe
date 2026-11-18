@@ -23,4 +23,5 @@ docker stop eyesonme_restore_test
 ## Journal des tests
 | Date | Dump | Résultat |
 |---|---|---|
-| 2026-11-18 | eyesonme-20261118-160024.dump | OK — restauré dans un conteneur jetable, table `profile` présente avec la ligne `default`. (Test fait avec une table de démonstration : le schéma réel arrive avec les migrations du ticket suivant ; à refaire une fois `dbmate up` + seed passés.) |
+| 2026-11-18 | eyesonme-20261118-160024.dump | OK — restauré dans un conteneur jetable, table `profile` présente avec la ligne `default`. (Test fait avec une table de démonstration, avant les migrations.) |
+| 2026-11-18 | eyesonme-20261118-162048.dump | OK — après `dbmate up` : 4 tables + `schema_migrations`, 3 gestes, 3 actions, profil `default` et ses 3 réglages restaurés à l'identique dans un conteneur jetable. |
