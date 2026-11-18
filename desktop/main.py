@@ -204,9 +204,11 @@ with HandLandmarker.create_from_options(options) as detector:
 
             mouse_x = int(index_x / width * screen_width)
             mouse_y = int(index_y / height * screen_height)
+            
+            margin = 10
 
-            mouse_x = max(0, min(mouse_x, screen_width - 1))
-            mouse_y = max(0, min(mouse_y, screen_height - 1))
+            mouse_x = max(margin, min(mouse_x, screen_width - margin - 1))
+            mouse_y = max(margin, min(mouse_y, screen_height - margin - 1))
 
             pyautogui.moveTo(mouse_x, mouse_y, duration=0)
 
