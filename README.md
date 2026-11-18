@@ -34,3 +34,7 @@ chore/ Maintenance et tâches techniques chore/update-dependencies
 perf/ Amélioration des performances perf/optimize-queries
 build/ Modifications du système de build build/vite-config
 ci/ Configuration CI/CD ci/github-actions
+
+### Technologies utilisés
+
+cv2
