@@ -1,0 +1,46 @@
+name: eyesonme
+
+services:
+  db:
+    image: postgres:16.6-alpine
+    container_name: eyesonme_db
+    restart: unless-stopped
+    # Aucun "ports:" : la base n'est joignable que par le réseau Docker eyesonme_net.
+    environment:
+      POSTGRES_USER: eyesonme_owner
+      POSTGRES_PASSWORD: ${EYESONME_OWNER_PASSWORD:?défini dans .env}
+      POSTGRES_DB: ${EYESONME_DB:-eyesonme}
+      EYESONME_APP_PASSWORD: ${EYESONME_APP_PASSWORD:?défini dans .env}
+    # Réglage léger pour une machine de 1 Go de RAM partagée avec 8 autres conteneurs.
+    command:
+      - postgres
+      - -c
+      - shared_buffers=128MB
+      - -c
+      - max_connections=50
+      - -c
+      - work_mem=4MB
+      - -c
+      - effective_cache_size=256MB
+    volumes:
+      - eyesonme_pgdata:/var/lib/postgresql/data
+      - ./initdb:/docker-entrypoint-initdb.d:ro
+    networks:
+      - eyesonme_net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U eyesonme_owner -d ${EYESONME_DB:-eyesonme}"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+
+volumes:
+  eyesonme_pgdata:
+    name: eyesonme_pgdata
+
+networks:
+  eyesonme_net:
+    name: eyesonme_net
