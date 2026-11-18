@@ -202,9 +202,28 @@ with HandLandmarker.create_from_options(options) as detector:
             active_hand = next(iter(current_hands.values()))
             index_x, index_y = active_hand[8]
 
-            mouse_x = int(index_x / width * screen_width)
-            mouse_y = int(index_y / height * screen_height)
-            
+            zone_left = 0.15
+            zone_right = 0.85
+            zone_top = 0.15
+            zone_bottom = 0.85
+
+            normalized_x = index_x / width
+            normalized_y = index_y / height
+
+            normalized_x = max(zone_left, min(normalized_x, zone_right))
+            normalized_y = max(zone_top, min(normalized_y, zone_bottom))
+
+            mouse_x = int(
+                (normalized_x - zone_left)
+                / (zone_right - zone_left)
+                * screen_width
+            )
+            mouse_y = int(
+                (normalized_y - zone_top)
+                / (zone_bottom - zone_top)
+                * screen_height
+            )
+
             margin = 10
 
             mouse_x = max(margin, min(mouse_x, screen_width - margin - 1))
